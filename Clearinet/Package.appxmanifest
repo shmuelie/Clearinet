@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+         xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+         xmlns:uap2="http://schemas.microsoft.com/appx/manifest/uap/windows10/2"
+         xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
+         xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+         IgnorableNamespaces="uap uap2 uap3 rescap">
+  <Identity Name="Clearinet.Dev" Publisher="CN=Clearinet Development" Version="0.0.1.2" ProcessorArchitecture="x64" />
+  <Properties>
+    <DisplayName>Clearinet Development</DisplayName>
+    <PublisherDisplayName>Clearinet Contributors</PublisherDisplayName>
+    <Logo>Assets\Logo.png</Logo>
+  </Properties>
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.19041.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+  <Resources>
+    <Resource Language="en-us" />
+  </Resources>
+  <Applications>
+    <Application Id="Clearinet" Executable="Clearinet.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements DisplayName="Clearinet" Description="Clearinet Web Debugger"
+                          Square150x150Logo="Assets\Logo.png" Square44x44Logo="Assets\Logo.png"
+                          BackgroundColor="transparent" />
+      <Extensions>
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap3:FileTypeAssociation Name="saz" Parameters="-noattach &quot;%1&quot;">
+            <uap:DisplayName>Clearinet Session Archive</uap:DisplayName>
+            <uap:Logo>Assets\Logo.png</uap:Logo>
+            <uap:SupportedFileTypes>
+              <uap:FileType>.saz</uap:FileType>
+            </uap:SupportedFileTypes>
+            <uap2:SupportedVerbs>
+              <uap3:Verb Id="View" Parameters="-viewer &quot;%1&quot;">Open Viewer Mode</uap3:Verb>
+            </uap2:SupportedVerbs>
+          </uap3:FileTypeAssociation>
+        </uap:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+</Package>

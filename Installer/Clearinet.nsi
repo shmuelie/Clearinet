@@ -83,6 +83,9 @@ File "..\Content\SAZFile.ico"
 
 ; Install any 3P dependencies
 File "..\Clearinet\bin\Release\Ionic.Zip.Reduced.dll"
+SetOutPath "$INSTDIR\Scripts"
+File "..\Clearinet\bin\Release\Scripts\poc.js"
+SetOutPath "$INSTDIR"
 
 ; Install any default extensions
 ; Install any template scripts/responses/etc
@@ -213,6 +216,8 @@ Delete "$INSTDIR\clearinet.exe"
 Delete "$INSTDIR\clearinet.exe.config"
 Delete "$INSTDIR\SAZFile.ico"
 Delete "$INSTDIR\Ionic.Zip.Reduced.dll"
+Delete "$INSTDIR\Scripts\poc.js"
+RMDir "$INSTDIR\Scripts"
 
 Delete "$INSTDIR\Credits.txt"
 

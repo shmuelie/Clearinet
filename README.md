@@ -33,6 +33,18 @@ This application is the spiritual successor to the Fiddler Web Debugger, a tool 
 ## Get Involved
 - [Clearinet Community](https://groups.google.com/group/clearinet)
 - [Contribute Code or Content](/Docs/CONTRIBUTING.md)
+
+## Building the development MSIX bundle
+
+On Windows with Visual Studio 2026, the Windows 11 SDK 10.0.26100.0, and the .NET Framework 4.8.1 targeting pack, run this from the repository root in a Visual Studio Developer PowerShell:
+
+```powershell
+MSBuild.exe .\Clearinet\Clearinet.csproj /restore /p:Configuration=Release /p:Platform=x64 /p:GenerateAppxPackageOnBuild=true /p:AppxPackageSigningEnabled=false /p:AppxBundle=Always '/p:AppxBundlePlatforms=x64|ARM64'
+```
+
+The single-project build produces an unsigned x64+ARM64 `.msixbundle` under `Clearinet\AppPackages\`. It uses the standalone `Microsoft.Windows.SDK.BuildTools.MSIX` tooling, not a Windows Application Packaging Project or the Windows App SDK runtime. The package identity and publisher are provisional; the bundle must be signed with an appropriately matching, trusted certificate before it can be installed. Increment the four-part version in `Clearinet\Package.appxmanifest` for updates.
+
+On first launch, Clearinet copies the bundled `Content\poc.js` to `Documents\Clearinet\Scripts\CustomRules.js`, leaving subsequent edits untouched. The script intentionally retains its startup/shutdown alerts and startup sound. A configured `app.paths.rulesscript` preference still takes precedence. Ordinary builds do not generate an MSIX, and `Installer\Clearinet.nsi` remains available for NSIS builds.
   
 ## Links
 - [App Website](https://clearinet.app)

@@ -114,8 +114,17 @@ namespace Clearinet
                 case "Transcoders_User":
                     return CApp.Prefs.GetStringPref("app.paths.extensions_user",
                                                 GetPath("UserFolder") + "ImportExport" + Path.DirectorySeparatorChar);
-                case "RulesScript":    // TODO: Replace with CustomRules.js file
-                    return CApp.Prefs.GetStringPref("app.paths.rulesscript", @"C:\src\cin\Content\poc.js");
+                case "RulesScript":
+                    string configuredScript = CApp.Prefs.GetStringPref("app.paths.rulesscript", null);
+                    if (configuredScript != null) return configuredScript;
+
+                    string userScript = Path.Combine(GetPath("Scripts"), "CustomRules.js");
+                    if (!File.Exists(userScript))
+                    {
+                        Directory.CreateDirectory(GetPath("Scripts"));
+                        File.Copy(Path.Combine(Application.StartupPath, "Scripts", "poc.js"), userScript);
+                    }
+                    return userScript;
                 case "Root": return Application.StartupPath;
                 case "Scripts":
                     return GetPath("UserFolder") + "Scripts" + Path.DirectorySeparatorChar;
