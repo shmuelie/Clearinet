@@ -22,3 +22,13 @@ Below is a list of some preferences, their defaults, and what they control
 `user.paths.editors.code`, `notepad` => Default editor for editing your script. `code.exe` is a better choice if you install the free [Visual Studio Code](https://code.visualstudio.com/)
 
 You can find all of the Preferences checked by Clearinet by [Searching the code](https://github.com/search?q=repo%3Aericlaw1979%2Fclearinet+%2FGet.*Pref%5C%28%2F&type=code)
+
+`app.paths.rules.script` defaults to `Documents\Clearinet\CustomRules_0_0_2_6.js`.
+The earlier `app.paths.rulesscript` preference is honored when the new preference
+is not set. The `-noscript` command-line option disables scripting regardless of
+the configured path.
+Scripting is optional: a missing file or empty path disables scripting without
+preventing startup or shutdown. Clearinet does not install or generate a rules
+script. You can supply your own file or override this preference with its path.
+Invalid or unreadable scripts still report errors rather than being treated as
+absent.
