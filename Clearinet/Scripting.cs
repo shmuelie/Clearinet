@@ -74,51 +74,33 @@ namespace Clearinet
                 CApp.Log.Log($"Script engine is disabled by command-line argument.");
                 return;
             }
+
+            if (string.IsNullOrWhiteSpace(scriptPath))
+                throw new ArgumentNullException(nameof(scriptPath));
+
+            _scriptPath = Path.GetFullPath(scriptPath);
+            string directory = Path.GetDirectoryName(_scriptPath);
+            string fileName = Path.GetFileName(_scriptPath);
+
+            // Initial failures propagate to the caller; reload failures use script reporting.
+            CompileScript(false);
             try
             {
-                Debug.Assert(scriptPath.HasText());
-                _scriptPath = Path.GetFullPath(scriptPath);
-                string directory = Path.GetDirectoryName(_scriptPath);
-                string fileName = Path.GetFileName(_scriptPath);
-
-                // If we boot and the script file doesn't exist, copy the sample script to the expected location.
-                // Ensure we do this BEFORE trying to set up the watchers to ensure the folders are created or
-                // else adding the watcher will fail with a DirectoryNotFoundException.
-                if (!File.Exists(_scriptPath))
+                _watcher = new FileSystemWatcher(directory, fileName)
                 {
-                    CApp.Log.Log($"Script file not found: {_scriptPath}; creating from default sample.");
-                    Directory.CreateDirectory(directory);
-                    File.Copy(CONFIG.GetPath("SampleRulesScript"), _scriptPath);
-                }
+                    NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.CreationTime,
+                    SynchronizingObject = CApp.UI, // Ensure events are raised on the UI thread
+                    EnableRaisingEvents = true
+                };
 
-                try
-                {
-                    _watcher = new FileSystemWatcher(directory, fileName)
-                    {
-                        NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.CreationTime,
-                        SynchronizingObject = CApp.UI, // Ensure events are raised on the UI thread
-                        EnableRaisingEvents = true
-                    };
-
-                    // FileSystemWatcher frequently fires multiple events for a single save.
-                    // We handle this using a debounced event handler.
-                    _watcher.Changed += OnScriptFileChanged;
-                }
-                catch (Exception ex)
-                {
-                    CApp.ReportException(ex, "Failed to initialize script file watcher",
-                        $"There was a problem initializing the script file watcher for {PlatformAPI.CompactPath(_scriptPath, 50)}.");
-                }
-
-                if (File.Exists(_scriptPath))
-                {
-                    CompileScript();
-                }
+                // FileSystemWatcher frequently fires multiple events for a single save.
+                // We handle this using a debounced event handler.
+                _watcher.Changed += OnScriptFileChanged;
             }
             catch (Exception ex)
             {
-                CApp.ReportException(ex, "Failed to initialize script engine",
-                    $"There was a problem initializing the script engine for {PlatformAPI.CompactPath(_scriptPath, 50)}.");
+                CApp.ReportException(ex, "Failed to initialize script file watcher",
+                    $"There was a problem initializing the script file watcher for {PlatformAPI.CompactPath(_scriptPath, 50)}.");
             }
         }
 
@@ -151,7 +133,7 @@ namespace Clearinet
             }
         }
 
-        private void CompileScript()
+        private void CompileScript(bool reportErrors = true)
         {
             try
             {
@@ -230,7 +212,7 @@ namespace Clearinet
                     _RunMainMethod();
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) when (reportErrors)
             {
                 _isReadyForCalls = false;
                 _ClearCachedHandlerMethods();
