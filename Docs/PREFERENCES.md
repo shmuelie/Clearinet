@@ -9,3 +9,10 @@ Below is a list of some preferences, their defaults, and what they control
 "app.ui.toolbar.lookupurl", "https://developer.mozilla.org/en-US/search?q=$W$" => The target of the lookup tool in the toolbar.
 "app.high_resolution_clock", true => Whether the app should tell Windows to increase timer resolution for improved accuracy in timing scenarios.
 "inspectors.headers.highlighted_names", "content-type,content-length,host" => change the color of more important headers
+
+`app.paths.rulesscript` defaults to `Documents\Clearinet\Scripts\CustomRules.js`.
+Scripting is optional: a missing file or empty path disables scripting without
+preventing startup or shutdown. Clearinet does not install or generate a rules
+script. You can supply your own file or override this preference with its path.
+Invalid or unreadable scripts still report errors rather than being treated as
+absent.

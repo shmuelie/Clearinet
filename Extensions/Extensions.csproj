@@ -69,7 +69,6 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="HeaderView.Designer.cs" />
-    <Compile Include="HexInspectors.cs" />
     <Compile Include="ImageInspector.cs" />
     <Compile Include="ImageView.cs">
       <SubType>UserControl</SubType>
@@ -88,18 +87,38 @@
     <EmbeddedResource Include="ImageView.resx" />
     <EmbeddedResource Include="RawText.resx" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(ClearinetPackageBuild)' != 'true'">
     <ProjectReference Include="..\Clearinet\Clearinet.csproj">
       <Project>{38557fae-6dad-4b56-878e-eaddc455d47b}</Project>
       <Name>Clearinet</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(ClearinetPackageBuild)' == 'true'">
+    <Reference Include="Clearinet">
+      <HintPath>$(ClearinetTargetPath)</HintPath>
+    </Reference>
+    <Reference Remove="System.Buffers,*;System.Memory,*;System.Numerics.Vectors,*;System.Runtime.CompilerServices.Unsafe,*" />
+    <Reference Include="System.Buffers;System.Memory;System.Numerics.Vectors;System.Runtime.CompilerServices.Unsafe">
+      <HintPath>$(ClearinetTargetDirectory)%(Identity).dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(ClearinetPackageBuild)' != 'true'">
     <PostBuildEvent>powershell -Command "$docPath = [Environment]::GetFolderPath('MyDocuments'); Copy-Item -Path '$(TargetPath)' -Destination \"$docPath\Clearinet\Extensions\" -Force"</PostBuildEvent>
   </PropertyGroup>
+  <PropertyGroup>
+    <ClearinetPackagePayloadDependsOn>Build</ClearinetPackagePayloadDependsOn>
+  </PropertyGroup>
+  <Target Name="GetClearinetPackagePayload" DependsOnTargets="$(ClearinetPackagePayloadDependsOn)"
+          Returns="@(_ClearinetPackagePayload)">
+    <ItemGroup>
+      <_ClearinetPackagePayload Include="$(TargetPath)" TargetPath="Extensions\$(TargetFileName)" />
+      <_ClearinetPackagePayload Include="@(ReferenceCopyLocalPaths)" TargetPath="%(Filename)%(Extension)"
+                               Condition="'%(ReferenceCopyLocalPaths.Extension)' != '.xml' and '%(ReferenceCopyLocalPaths.Extension)' != '.pdb'" />
+    </ItemGroup>
+  </Target>
 </Project>

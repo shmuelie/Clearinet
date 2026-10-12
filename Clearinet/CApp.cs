@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -263,7 +264,24 @@ namespace Clearinet
 
         internal static void CreateScriptEngine()
         {
-            scriptRules = new JScriptEngine(CONFIG.GetPath("RulesScript"));
+            string sScriptPath = CONFIG.GetPath("RulesScript");
+            if (string.IsNullOrWhiteSpace(sScriptPath))
+            {
+                Log.Log("No rules script configured; scripting is disabled.");
+                return;
+            }
+
+            try
+            {
+                File.GetAttributes(sScriptPath);
+            }
+            catch (IOException eX) when (eX is FileNotFoundException || eX is DirectoryNotFoundException)
+            {
+                Log.LogFormat("No rules script found at {0}; scripting is disabled.", sScriptPath);
+                return;
+            }
+
+            scriptRules = new JScriptEngine(sScriptPath);
         }
 
         internal static void OnProxyAttach()
@@ -372,8 +390,11 @@ namespace Clearinet
 
         internal static bool OnBeforeShutdown()
         {
-            scriptRules.CallMethod("OnBeforeShutdown", null, out object oRes);
-            if ((null != oRes) && (false == (bool)oRes)) return false;
+            if (scriptRules != null)
+            {
+                scriptRules.CallMethod("OnBeforeShutdown", null, out object oRes);
+                if ((null != oRes) && (false == (bool)oRes)) return false;
+            }
 
             CancelEventHandler evtBeforeShutdown = BeforeAppShutdown;
             if (null != evtBeforeShutdown)

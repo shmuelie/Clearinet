@@ -71,9 +71,6 @@ namespace Clearinet
 
             _scriptPath = Path.GetFullPath(scriptPath);
 
-            if (!File.Exists(_scriptPath))
-                throw new FileNotFoundException("Script file not found.", _scriptPath);
-
             // Initial compile
             CompileScript();
 
