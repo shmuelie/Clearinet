@@ -3128,7 +3128,7 @@ namespace Clearinet
 
         public void actCustomizeRules()
         {
-            CApp.scriptRules.EnsureUserScriptExists();
+            CApp.scriptRules?.EnsureUserScriptExists();
             Utilities.LaunchNative(CONFIG.GetPath("Editor.Code"),
                 $"\"{CONFIG.GetPath("RulesScript")}\"");
         }
