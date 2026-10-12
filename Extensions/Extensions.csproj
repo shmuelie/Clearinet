@@ -130,18 +130,27 @@
       <DependentUpon>RawText.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(ClearinetPackageBuild)' != 'true'">
     <ProjectReference Include="..\Clearinet\Clearinet.csproj">
       <Project>{38557fae-6dad-4b56-878e-eaddc455d47b}</Project>
       <Name>Clearinet</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(ClearinetPackageBuild)' == 'true'">
+    <Reference Include="Clearinet">
+      <HintPath>$(ClearinetTargetPath)</HintPath>
+    </Reference>
+    <Reference Remove="System.Buffers,*;System.Memory,*;System.Numerics.Vectors,*;System.Runtime.CompilerServices.Unsafe,*" />
+    <Reference Include="System.Buffers;System.Memory;System.Numerics.Vectors;System.Runtime.CompilerServices.Unsafe">
+      <HintPath>$(ClearinetTargetDirectory)%(Identity).dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(ClearinetPackageBuild)' != 'true'">
     <PostBuildEvent>powershell -Command "$destDir = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'Clearinet\Extensions'; if (!(Test-Path $destDir)) { New-Item -ItemType Directory -Path $destDir -Force }; Copy-Item -Path '$(TargetPath)', '$(TargetDir)Be.Windows.Forms.HexBox.dll', '$(TargetDir)Microsoft.Web.WebView2.Core.dll', '$(TargetDir)Microsoft.Web.WebView2.WinForms.dll' -Destination $destDir -Force; Copy-Item -Path '$(TargetDir)runtimes' -Destination $destDir -Recurse -Force"</PostBuildEvent>
   </PropertyGroup>
   <Import Project="..\Clearinet\packages\Microsoft.Web.WebView2.1.0.4258.31\build\Microsoft.Web.WebView2.targets" Condition="Exists('..\Clearinet\packages\Microsoft.Web.WebView2.1.0.4258.31\build\Microsoft.Web.WebView2.targets')" />
@@ -150,5 +159,18 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\Clearinet\packages\Microsoft.Web.WebView2.1.0.4258.31\build\Microsoft.Web.WebView2.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\Clearinet\packages\Microsoft.Web.WebView2.1.0.4258.31\build\Microsoft.Web.WebView2.targets'))" />
+  </Target>
+  <PropertyGroup>
+    <ClearinetPackagePayloadDependsOn>Build</ClearinetPackagePayloadDependsOn>
+  </PropertyGroup>
+  <Target Name="GetClearinetPackagePayload" DependsOnTargets="$(ClearinetPackagePayloadDependsOn)"
+          Returns="@(_ClearinetPackagePayload)">
+    <ItemGroup>
+      <_ClearinetPackagePayload Include="$(TargetPath)" TargetPath="Extensions\$(TargetFileName)" />
+      <_ClearinetPackagePayload Include="@(ReferenceCopyLocalPaths)" TargetPath="%(Filename)%(Extension)"
+                               Condition="'%(ReferenceCopyLocalPaths.Extension)' != '.xml' and '%(ReferenceCopyLocalPaths.Extension)' != '.pdb'" />
+      <_ClearinetPackagePayload Include="@(ContentWithTargetPath)" TargetPath="%(ContentWithTargetPath.TargetPath)"
+                               Condition="'%(ContentWithTargetPath.CopyToOutputDirectory)' == 'Always' or '%(ContentWithTargetPath.CopyToOutputDirectory)' == 'PreserveNewest'" />
+    </ItemGroup>
   </Target>
 </Project>
