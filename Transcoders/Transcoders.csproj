@@ -52,15 +52,31 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(ClearinetPackageBuild)' != 'true'">
     <ProjectReference Include="..\Clearinet\Clearinet.csproj">
       <Project>{38557fae-6dad-4b56-878e-eaddc455d47b}</Project>
       <Name>Clearinet</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup Condition="'$(ClearinetPackageBuild)' == 'true'">
+    <Reference Include="Clearinet">
+      <HintPath>$(ClearinetTargetPath)</HintPath>
+    </Reference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(ClearinetPackageBuild)' != 'true'">
     <PostBuildEvent>powershell -Command "$docPath = [Environment]::GetFolderPath('MyDocuments'); Copy-Item -Path '$(TargetPath)' -Destination \"$docPath\Clearinet\ImportExport\" -Force"
 </PostBuildEvent>
   </PropertyGroup>
+  <PropertyGroup>
+    <ClearinetPackagePayloadDependsOn>Build</ClearinetPackagePayloadDependsOn>
+  </PropertyGroup>
+  <Target Name="GetClearinetPackagePayload" DependsOnTargets="$(ClearinetPackagePayloadDependsOn)"
+          Returns="@(_ClearinetPackagePayload)">
+    <ItemGroup>
+      <_ClearinetPackagePayload Include="$(TargetPath)" TargetPath="ImportExport\$(TargetFileName)" />
+      <_ClearinetPackagePayload Include="@(ReferenceCopyLocalPaths)" TargetPath="%(Filename)%(Extension)"
+                               Condition="'%(ReferenceCopyLocalPaths.Extension)' != '.xml' and '%(ReferenceCopyLocalPaths.Extension)' != '.pdb'" />
+    </ItemGroup>
+  </Target>
 </Project>
