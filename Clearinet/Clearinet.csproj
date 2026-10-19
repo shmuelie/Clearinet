@@ -105,7 +105,7 @@
              CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\Content\Bundled\dwebp.exe" Link="Tools\dwebp.exe"
              CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="..\Content\Bundled\SampleRulesAlpha.js"
+    <Content Include="..\Content\Bundled\SampleRulesAlpha.js" Condition="'$(EnableMsixTooling)' != 'true'"
              CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <Target Name="GenerateAssemblyBuiltDate" BeforeTargets="CoreCompile">
